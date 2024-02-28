@@ -1,30 +1,52 @@
 #include "binary_trees.h"
+#include "limits.h"
 
-/**
- * max - Finds the maximum of two integers
- * @a: First integer
- * @b: Second integer
- *
- * Return: Maximum of a and b
- */
-static int max(int a, int b)
-{
-	return (a > b ? a : b);
-}
-
+size_t height(const binary_tree_t *tree);
+int is_avl_helper(const binary_tree_t *tree, int lo, int hi);
+int binary_tree_is_avl(const binary_tree_t *tree);
 /**
  * height - Computes the height of a binary tree
  * @tree: A pointer to the root node of the tree
  *
  * Return: Height of the tree, -1 if NULL
  */
-static int height(const binary_tree_t *tree)
+size_t height(const binary_tree_t *tree)
 {
-	if (tree == NULL)
-		return (-1);
-	return (1 + max(height(tree->left), height(tree->right)));
-}
+	if (tree)
+	{
+		size_t l = 0, r = 0;
 
+		l = tree->left ? 1 + height(tree->left) : 1;
+		r = tree->right ? 1 + height(tree->right) : 1;
+		return ((l > r) ? l : r);
+	}
+	return (0);
+}
+/**
+ * is_avl_helper - helping the binary tree.
+ * @tree: pointer to an array tree
+ * @lo: an array lo
+ * @hi: an array hi
+ * Return: 1 when success
+ */
+int is_avl_helper(const binary_tree_t *tree, int lo, int hi)
+{
+	size_t avgt, rgvgt, dumddiff;
+
+	if (tree != NULL)
+	{
+		if (tree->n < lo || tree->n > hi)
+			return (0);
+		avgt = height(tree->left);
+		rgvgt = height(tree->right);
+		dumddiff = avgt > rgvgt ? avgt - rgvgt : rgvgt - avgt;
+		if (dumddiff > 1)
+			return (0);
+		return (is_avl_helper(tree->left, lo, tree->n - 1) &&
+			is_avl_helper(tree->right, tree->n + 1, hi));
+	}
+	return (1);
+}
 /**
  * binary_tree_is_avl - Checks if a binary tree is a valid AVL Tree
  * @tree: A pointer to the root node of the tree to check
@@ -33,15 +55,7 @@ static int height(const binary_tree_t *tree)
  */
 int binary_tree_is_avl(const binary_tree_t *tree)
 {
-	int left_height, right_height;
-
 	if (tree == NULL)
 		return (0);
-	left_height = height(tree->left);
-	right_height = height(tree->right);
-
-	if (abs(left_height - right_height) > 1)
-		return (0);
-	return (binary_tree_is_avl(tree->left) &&
-			binary_tree_is_avl(tree->right));
+	return (is_avl_helper(tree, INT_MIN, INT_MAX));
 }
